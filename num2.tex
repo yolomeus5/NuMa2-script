@@ -1,0 +1,775 @@
+\documentclass{article}
+
+\usepackage[paper=a4paper,left=40mm,right=40mm,top=25mm,bottom=25mm]{geometry}
+\usepackage[english]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{tabularx}
+\usepackage{paralist}
+\usepackage{hyperref} %klickbares Inhaltsverzeichnis
+\usepackage{xcolor}
+
+\mathchardef\ordinarycolon\mathcode`\:
+\mathcode`\:=\string"8000
+\begingroup \catcode`\:=\active
+  \gdef:{\mathrel{\mathop\ordinarycolon}}
+\endgroup
+
+%\newcommand{\qed}{\hfill $\Box$}
+\newcommand{\limn}{\lim_{n \to \infty}}
+\newcommand{\einhalb}{\frac{1}{2}}
+\newcommand{\teinhalb}{\tfrac{1}{2}}
+\newcommand{\halbe}[1]{\frac{#1}{2}}
+\newcommand{\norm}[1]{\lVert #1 \rVert}
+\newcommand{\bignorm}[1]{\big\lVert #1 \big\rVert}
+\newcommand{\Bignorm}[1]{\Big\lVert #1 \Big\rVert}
+\newcommand{\biggnorm}[1]{\bigg\lVert #1 \bigg\rVert}
+\newcommand{\folge}[1]{({#1}_n)_{n \in \mathbb{N}}}
+\newcommand{\einsdurch}[1]{\frac{1}{#1}}
+\newcommand{\teinsdurch}[1]{\tfrac{1}{#1}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\ohnenull}{\setminus\{0\}}
+\newcommand{\links}{\glqq$\Leftarrow$\grqq}
+\newcommand{\und}{~ \text{and} ~}
+\newcommand{\grad}{\text{grad}~}
+\newcommand{\gdw}{\Leftrightarrow}
+\newcommand{\rot}{\color{red}}
+\newcommand{\blau}{\color{blue}}
+\newcommand{\rank}{\text{rank}}
+\newcommand{\ipo}{{i+1}}
+\newcommand{\partiell}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\nhn}{\newline\hfill\newline}
+
+\renewcommand \thesection{\Roman{section}}
+\renewcommand \thesubsubsection{\Roman{section}.\arabic{subsubsection}}
+
+\theoremstyle{plain}
+%\newtheorem{theorem}{Theorem}[section]
+%\newtheorem{lemma}[theorem]{Lemma}
+%\newtheorem{corollary}[theorem]{Corollary}
+%\newtheorem{definition}[theorem]{Definition}
+%\theoremstyle{remark}
+%\newtheorem*{remark}{Remark}
+\theoremstyle{definition}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{motivation}[theorem]{Motivation}
+\newtheorem*{remark}{Remark}
+\newtheorem*{revision}{Revision}
+\newtheorem*{example}{Example}
+
+\title{Numerical Mathematics II \\ SS 2019}
+\author{}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+\section{Basic Facts on Ordinary Differential Equations}
+\begin{definition}
+
+	An ODE of first order in some interval $I\subset \R$ is an equation of the form
+\[
+y'(t)=f(t,y(t)),~ t \in I
+\]
+where $y: I \to \C^n ,~~  y\in C^1(I)$ and $f: I\times\C^n\to\C^n$. The order is the highest derivative in the ODE. We call an ODE \textbf{explicit} if we can solve it for $y'$ and \textbf{implicit} otherwise.
+\end{definition}
+
+\begin{definition}
+An ordinary differential equation of order $n$ is given as
+\[
+y^{(n)}(t) = f(t,y(t),y'(t),\dots ,y^{(n-1)}(t))
+\]
+for $t \in I\subset \R$ where $y$ is a $n$-times differentiable function on $I$ and $f:I\times(\C^n)^n\to \C^n$ is a function.
+
+A solution $y$ of an ODE on some $J\subset I$ is a (multiple) continuously differentiable function $y: I\to \C^n$ which solves the ODE
+\end{definition}
+\begin{remark}
+	An ODE of order $n$ can be transferred to an ODE of first order by transformation.
+\end{remark}
+
+\begin{definition}
+	We call an ODE
+ \[
+ y^{(n)}(t)=f(t,y(t),y'(t),\dots ,y^{(n-1)}(t)), t \in I
+ \]
+ an \textbf{initial value problem (IVP)} for $y$ if we have additionally the constraints $y(t_0)=y_0, \dots, y^{(n-1)}(t_0)=y_{n-1}$ for $t_0 \in I$.
+\end{definition}
+
+\begin{remark}
+An ODE has a swarm of solutions, IVP has specific solutions. The swarm of solutions with all constraints is called general solution.
+\end{remark}
+
+
+\begin{theorem}[Picard-Lindelöf]
+	For $t_0\in\R,~ y_0\in\R^n,~a,b>0$ we set \[
+	I=[t_0 -a, t_0+a] \und Q=\{z\in\C^n ~|~ \norm{z-y_0}_\infty \leq b\}.\] Let furthermore $F:I\times Q\to\C^n$ be continuous, with bounded components by some constant $R$ and Lipschitz-continuous in the second argument, i.e.
+	\[
+	\big|F_j(t,u)-F(t,v)\big| \leq L \sum_{k=1}^n |u_k - v_k|, ~~j=1,\dots,n~,~~ t\in I,~~u,v \in Q.
+	\]
+	Then the IVP $y'(t)=F(t,y(t)),~ y(b)=y_0$ has on $J=[t_0-\alpha, t_0 + \alpha]\subset I$ with $\alpha=\min\{a,\frac b R\}$ exactly one differentiable solution.
+\end{theorem}
+\begin{proof}
+No Proof.
+\end{proof}
+
+
+\begin{remark}
+The existence is local around $t_0$.
+\end{remark}
+
+\begin{definition}
+The system $y'(t)=A(t)y(t)+f(t)$ for some interval $I\subset\R$ with $A(t)=(a_{ij}(t))_{ij}\in\C^{n,n},~ a_{ij}:I\to\C \text{ for } i,j \in \{1,\dots, n\},~n\in\N, ~y: I\to \C^n$ and $f:I\to \C^n$ is a linear system of ODEs.
+
+The function $f$ is called inhomogeneity.
+
+The system is called homogenous if $f=0$ and inhomogeneous otherwise.
+\end{definition}
+
+\begin{theorem}
+	Let $y_1,y_n$ be two solutions of the homogeneous system
+\end{theorem}
+
+$ \int_{\varepsilon}^{\text{deine mudda}}\circ ~d \mu = [\text{abc},	\text{def}]$
+
+\setcounter{subsection}{2}
+\subsection{Qualitative Behaviour of ODEs}
+\begin{example}
+Let us consider the $n$-dimensional non contonomous system of first order
+\begin{align*}
+	y'(t)&=f(t,y(t))\\
+	y(t_0)&=y_0
+\end{align*}
+where $f: D \to \R^n, ~D\subset I\times \R^n,~ t_0 \in I,~ I\subset \R$. The questions we are dealing with are:
+\begin{enumerate}
+\item Why only first order?
+\item What is the relation between a non-autonomous and an autonomous system?
+\end{enumerate}
+\end{example}
+
+The reason behind 1. is that any ODE of $n$-th order can be transformed into a $n$-dimensional ODE of first order. Consider the ODE
+\[
+x^{(n)}=F(t,x(t),x'(t),\dots,x^{(n-1)}(t))
+\]
+and define a vector $y$ with its components $y_i, ~ i=1,\dots,n$ by
+\[
+y_i(t)=x^{(i-1)}(t)
+\]
+and a vector field $f(t,y)$ by
+\[
+f(t,y) = \Big(t,y_1,y_2,\dots,y_n,F(t,y_1,y_2,\dots,y_n)\Big)^T
+\]
+Then the ODE of $n$-th order is equivalent to $y'(t)=f(t,y)$.\newline
+
+A system of the form $y'(t)=f(t,y)$ is called an non-autonomous system, a system of the form $y=f(y)$ is called autonomous. We can transform a non-autonomous system to an autonomous system.
+
+Consider the ODE
+\[
+y'(t)=f(t,y) \und y(t_0) = y_0.
+\]
+We set
+\[
+z=\begin{bmatrix} y \\ s \end{bmatrix} \und \hat{f}=\begin{bmatrix} f(s,y) \\ 1 \end{bmatrix}, ~~ s\in \R
+\]
+Then
+\[
+z'(t)=\hat{f}(z(t)), ~ z(t_0)=z_0=\begin{bmatrix} y_0\\t_0 \end{bmatrix}
+\]
+is an autonomous system.
+
+In short, each ODE in $\R^n$ can be transformed to an autonomous ODE in $\R^{n+1}$
+
+\begin{remark}
+In the theorem of Picard-Lindelöf the ODE is of the form $f(t,y)$, where $y$ has to be Lipschitz-continuous.
+
+In the autonomous system the right hand side looks like $f(y(t))$, where $t$ and $y$ have to be Lipschitz-continuous.
+\end{remark}
+
+\subsubsection*{Analytic Continuation}
+"Local solutions can be spread onto a maximum time interval."\newline
+
+\setcounter{theorem}{13}
+\begin{definition}[Local Lipschitz]
+A function $f: X \to Y$ is local Lipschitz in $x\in X$ if the exists a neighbourhood $U_x \subseteq  X$ around $x$ such that $f|_{U_x}$ is Lipschitz-continuous.
+\end{definition}
+
+For $G:=I\times Q$ with $I=[t_0-a, t_0+a], ~ Q=\{z\in\C~|~ \norm{z-y_0}\leq b\}$ with $a,b>0$ the theorem of Picard-Lindelöf gives for local Lipschitz $f$ the existence of a solution $y_0(t)$ of the IVP
+\begin{align}
+	y'(t)&=f(t,y(t)) \tag{1.4}\\
+	y(t_0)&=y_0\notag
+\end{align}
+on some (small) inverval $I_0=[t_0-a_0,t_0+a_0]$ with $a_0=a>0$.
+
+We will have a look at what happens if we apply the theorem of Picard-Lindelöf on one side of the interval $I_0$. Let now be $t_1:=t_0+a_0$ and $y_1 = y_0(t_1)$. We then have that $(y_1,t_1)\in G$ and according to Picard-Lindelöf we know that the IVP with $y(t_1)=y_1$ has a unique solution $y_1(t)$ on $I_1:=[t_1-a_0,t_1+a_1]$ where $a_1>0$.
+
+Due to the uniqueness of the solution if hold $y_0(t)=y_1(t)$ on $I_0\cap I_1$ we are defining a continuoation of our solution on the greater interval.
+
+It holds
+\[
+y_{+}(t)=y_0(t) ~\text{for}~ t\in[t_0,t_1]
+\]
+and
+\[
+y_{+}(t)=y_1(t) ~\text{for}~ t \in (t_1,t_1+a_1]
+\]
+analogue for $y_{-}(t)$. Thus there exists a unique solution on the interval $[t_0, t_0+a_0+a_1+\dots]$ if $\sum_{k=0}^{\infty}a_k<\infty$. If $\sum_{k=0}^{\infty}a_k$ diverges, the solution exists globally in forward time.
+
+\begin{remark}
+It can happen that $a_n$ can arbitrary small when $(t_k,y_{+}(t_k))$ approaches the boundary of $G$. Then either $\norm{f((t_k),y_{+}(t_k))}$ or the Lipschitz-constant $L$ might get arbitrary large.
+\end{remark}
+
+\begin{definition}
+Let $f:G \to \R^n$ be continuous and local Lipschitz with respect to $y$ and let $(t_0,y_0)\in G$. Let furthermore $t_{\pm}:=t_{\pm}(t_0,y_0)\in\R$ be defined as
+\begin{align*}
+t_{+}&=\sup \{\tau>t_0 ~|~ \text{there exists a continuation}~ y_+ \text{ of (1.4) on } [t_0,\tau]\}\\
+t_{-}&=~\inf \{\tau>t_0 ~|~ \text{there exists a continuation}~ y_- \text{ of (1.4) on } [t_0,\tau]\}.
+\end{align*}
+The interval $(t_-,t_+)$ is the largest interval of existence of the IVP with some initial point $y(t_0)=y_0$.
+
+The maximum solution $y(t)$ is
+\[
+y(t)=\begin{cases} y_+(t) \text{ for } t\in[t_0,t_+) \\ y_-(t) \text{ for } t\in (t_-,t_0].\end{cases}
+\]
+\end{definition}
+
+\begin{example}
+Consider
+\[
+y'=y^2, ~ y(t_0)=y(0)=1, ~ y(t)=\frac{1}{1-t}.
+\]
+Then we have $(t_-,t_+)=(-\infty, 1) \text{ or } (1,\infty)$.
+\end{example}
+
+\begin{remark}
+In case of $t_+<\infty$ the maximum solution approches for $t\to t_+$, it can then happen that $\norm{y(t)}$ is unbounded. This is also called "blow up".
+\end{remark}
+
+\subsubsection*{Solutions and Initial Data}
+"What is the influence of a perturbation in $f,~y_0$ or $t_0$ on the solution?"\newline
+
+To consider this, we need the following Lemma.
+\begin{lemma}[Grönwall-Lemma]
+Let $I=[a,b]\subseteq \R$ and $g:I\to\R$ be a continuous function. If
+\[
+0\leq g(t)\leq \delta+\gamma \int_{a}^{t }g(x)~dx
+\]
+holds for all $t\in I, ~\delta,\gamma >0$, then it holds
+\[
+g(t)\leq\delta e^{\gamma(t-a)}.
+\]
+\end{lemma}
+\begin{proof}
+We set
+\[
+\varphi(t)=\delta+\gamma \int_{a}^{t }g(x)~dx.
+\]
+Then we have
+\[
+\varphi'(t)=\gamma\cdot g(t) \leq \gamma\varphi(t).
+\]
+Since
+\[
+\Big(\varphi\cdot e^{-\gamma t}\Big)' = \varphi'\cdot e^{-\gamma t} + \varphi \cdot (-\gamma) e^{-\gamma t}= e^{-\gamma t}\Big(\varphi'(t)-\gamma\varphi(t)\Big)\leq 0
+\]
+we have that $\varphi e^{-\gamma t}$ is monotone falling. It thus follows
+\[
+g(t)\cdot e^{-\gamma t}\leq \varphi(t)\cdot e^{\gamma t} \leq \varphi(a)\cdot e^{-\gamma a}= \delta \cdot e^{-\gamma a}
+\]
+for all $t\geq a$.
+\end{proof}
+The Grönwall-Lemma allows us to prove the following theorem.
+\begin{theorem}[Dependence on initial data]
+Let $D\subset I\times \R^n$ be open, $f:D\to\R^n$ continuous and local Lipschitz with respect to $y$ and $(t_0,y_0) \in D$. If the solution of
+\begin{align*}
+y'(t)&=f(t,y(t))\\
+y(t_0)&=y_0, ~y_0\in\R^n
+\end{align*}
+exists for all $t\in I=[a,b]$ then for each $\varepsilon>0$ there exists a $\delta>0$ such that \begin{enumerate}[(i)]
+\item If $\norm{y_0-z_0}<\delta$ there also exists a solution of
+\begin{align*}
+z'(t)&=f(t,z(t))\\
+z(t_0)&=z_0, ~z_0\in\R^n
+\end{align*}
+for $t \in I$.
+\item It holds
+\[
+\max_{t\in I}\norm{y(t)-z(t)}<\varepsilon.
+\]
+\end{enumerate}
+\end{theorem}
+\begin{proof}
+Since $D$ is open, there exists a $\bar\delta>0$ and a compact set
+\[
+K:=\{(t,z(t))~|~t\in I, ~ \norm{y(t)-z(t)}\leq\bar\delta\}\subset D.
+\]
+On $K$ the function $f$ is Lipschitz (with respect to $y$) with a Lipschitz-constant $L$. Let now $\delta<\bar\delta$ and $\norm{y_0-z_0}<\delta$. Then for all $t_0,t\in[a,b]$ it holds
+\[
+\norm{z(t)-y(t)}\leq \delta+L \int_{t_0}^{t }\norm{y(x)-z(x)}~dx.
+\]
+This can be seen by the integral representation of $y(t)$. Applying Grönwall's Lemma with $\gamma=L$ yields
+\begin{equation}
+\norm{y(t)-z(t)}\leq\delta\cdot e^{L(t-t_0)} \tag{I.5}
+\end{equation}
+and by choosing $\delta\leq\bar\delta\cdot e^{L(a-b)}$ it holds $\norm{y(t)-z(t)}\leq \bar\delta$ for all $t\in I$. Thus it holds $(t,z(t))\in K$ for $t\in[a,b]$ and hence we have shown \textit{(i)}.
+
+By choosing $\delta<\varepsilon\cdot e^{L(a-b)}$ it follows \textit{(ii)}.
+\end{proof}
+\begin{remark}
+We have thus shown, that the solution $y(t)$ of the IVP with initial value $y(t_0)=y_0$ depends continuously on the initial data. The solution is often written as $y(t;t_0,y_0,f)$.
+\end{remark}
+\begin{example}
+Let us consider the ODE
+\begin{align*}
+y'&=\lambda y, ~ \lambda \in \R\\
+y(0)&=y_0
+\end{align*}
+Here we have $L=|\lambda|$. The equation (I.5) gives
+\[
+|y(t)-z(t)|\leq e^{|\lambda|\cdot t} |y_0-z_0|.
+\]
+For $\lambda<0$ we know that $|y(t)-z(t)|$ decreases exponentially.
+\end{example}
+\subsection{Stability and Flow}
+\subsubsection*{Vector field}
+A solution of an ODE is a function $y:I\to\R^n$ which is differentiable on $I$. Its graph $\{(t,y(t))~|~t\in I\}$ is a differentiable curve in $\R^{n+1}$ also known as \textit{solution curve} or \textit{integral curve}. In each point $(t,y(t))$ the direction of the tangent is given by the $(1,f(t,y(t)))$. In other words, $f$ is assigning a direction to each point.
+
+\subsubsection*{Stability and small perturbations}
+Consider
+\[
+y'(t)=f(t,y(t)), ~ y(t_0)=y_0.
+\]
+We are now interested in a comparison of different solutions for $t\in[t_0,\infty)$ with respect to the initial condition. We denote the solution by $y(t)=y(t,t_0)$.
+
+Stability: $y(t_0)=\tilde y$ with $\tilde y$ near by $y_0$. The question we are dealing with is "How does $y(t,\tilde y)$ behave in comparison with $y(t,y_0)$?".\newline
+
+Let us consider an autonomous ODE, i.e. an ODE of the form $y'(t)=f(y(t))$.
+
+\begin{definition}[Equilibrium Point]
+A point $\bar y\in D\subset\R^n$ is called an equilibrium point of a mapping $f:D\to\R^n$ if $f(\bar y)=0$. The constant solution $y(t)=\bar y$ is the only solution with $y(t_0)=\bar y$.
+\end{definition}
+\begin{remark}
+Other names for equilibrium points are fixed points, equilibria and stationary points.
+\end{remark}
+\begin{definition}[Stability and asymptotic stability]
+An equilibrium point is \textbf{stable} (in the sense of Ljapunov) if for each $\varepsilon>0$ there exists a $\delta>0$ such that for $t\geq t_0$ and for all trajectories $y(t)$ with $\norm{y(t_0)-\bar y}\leq \delta$ it holds that
+\[
+\norm{y(t)-\bar y}\leq \varepsilon.
+\]
+An equilibrium point is \textbf{instable} if it is not stable. \newline
+
+\noindent An equilibrium point $\bar y$ is \textbf{asymptotic stable} if there exists a neighbourhood $U_{\bar y}$ of $\bar y$ such that
+\[
+y(t_0)\in U_{\bar y} \Rightarrow \lim_{t\to\infty} y(t)=\bar y.
+\]
+In this case $\bar y$ is called a sink.
+
+An equilibrium point $\bar y$ is a spring if for each solution $y(t)$ with $y(t_0)\in U_{\bar y}$ and $y(t_0)\neq \bar y$ there exists a $t_1>t_0$ such that $y(t)\not \in U_{\bar y}$ for all $t\geq t_1$.
+\end{definition}
+\begin{example}
+Consider an ODE in $\R^1$ given by $y'(t)=f(t,y(t))$. The equilibrium point is asymptotic stable if in $U_{\bar y}$ it holds that
+\[
+f(y)<0 \text{ for } y<\bar y ~~\und~~ f(y)>0 \text{ for } y>\bar y.
+\]
+\end{example}
+\begin{definition}[Stability of solutions]
+Let $y(t;y_0)$ be a solution of $y'(t)=f(y(t)), ~y(t_0)=y_0 ~\forall t\geq t_0$. Then the solution is \textbf{stable} if for each $\varepsilon>0$ there exists a $\delta>0$ such that
+\[
+\norm{y_0-\tilde y_0}\leq \delta \Rightarrow \norm{y(t;y_0)-y(t,\tilde y_0)}<\varepsilon
+\]
+for all $t>t_0$.
+The solution is \textbf{attractive} if there exists a $\delta >0$ such that
+\[
+\norm{y_0-\tilde y_0}<\delta \Rightarrow \lim_{t\to\infty}\norm{y(t;y_0)-y(t,\tilde y_0)}=0.
+\]
+The solution is \textbf{asymptotic stable} if its stable and attractive.
+\end{definition}
+\subsubsection*{Flow and Dynamical System}
+A Dynamical System is a mathematical model to understand a time independent (autonomous) process. This process shall not depend on the initial time but only on the initial state. Formally, a dynamical system is triple $(T,S,\Phi)$ where $T$ is the time space, $S$ is the state space and $\Phi:T\times S\to S$ is the flow. The time space can either be discrete ($T=\N$) or continuous ($T=\R,~ S=\R^n$). This dynamical system is described by an ODE: The entity of all solutions of an ODE is a dynamical system
+\[
+y'(t)=f(y)
+\]
+where $f$ is a differentiable vector field.
+
+\begin{definition}[Flow of an autonomous ODE]
+The flow $\Phi(t,y_0)$ or $\Phi_{t}(y_0)$ of an autonomous ODE
+\[
+y'(t)=f(y(t)), ~ y(t_0)=y_0
+\]
+is a mapping $\Phi:\R^{n+1}\to \R^n, ~ \Phi(t,y_0)=y(t)$ and with the following properties:
+\begin{enumerate}[(i)]
+\item $\Phi(t_0,y_0)=y_0$ for all $y_0\in\R^n$
+\item $\Phi(t_1+t_2,\cdot) = \Phi\Big(t_2,\Phi(t_1,\cdot)\Big)$ for $t_1,t_2\in \R$.
+\end{enumerate}
+\end{definition}
+
+\begin{remark}\mbox{}
+\begin{itemize}
+\item $\Phi(t,y_0)$ is the solution of the ODE $y'(t)=f(y(t))$ which starts in $y_0$ at $t_0$.
+\item $\Phi:\R^{n+1}\to\R^n$ is differentiable, i.e. $\Phi(t,y_0)$ is a $C^1$/function and it holds
+\[
+\partiell{}{t}\Phi(t,y_0)=f\Big(\Phi(t,y_0)\Big).
+\]
+\end{itemize}
+\end{remark}
+
+\begin{example}
+For the ODE
+\begin{align*}
+y'(t)&=Ay(t)\\
+y(t_0)&=y_0
+\end{align*}
+with $A\in \R^{n,n}$ it holds
+\[
+\Phi(t,y_0)=e^{At}y_0
+\]
+for all $t\in \R$.
+\end{example}
+
+\begin{lemma}
+Under the assumptions of the theorem of Picard-Lindelöf on the ODE
+\[
+y'(t)=f(y(t))
+\]
+the solutions $y_1$ and $y_2$ of different initial conditions do not intersect.
+\end{lemma}
+\begin{proof}
+Let us assume towards a contradiction that we have two solutions $\Phi(t_1,y_1)$ and $\Phi(t_2,y_2)$ with different initial conditions which intersect at $y^*$, i.e.
+\[
+\Phi(t_1,y_1)=\Phi(t_2,y_2)=y^*.
+\]
+We define
+\[
+v(t):=\Phi(t+t_1,y_1)=\Phi\big(t,\Phi(t_1,y_1)\big)=\Phi(t,y^*)
+\]
+and
+\[
+w(t):=\Phi(t+t_2,y_2)=\Phi\big(t,\Phi(t_2,y_2)\big)=\Phi(t,y^*).
+\]
+Then by the theorem of Picard-Lindelöf it follows that
+\[
+v(t)=w(t)
+\]
+what ends the proof.
+\end{proof}
+
+\noindent By
+\[
+\mathcal{O}(y_0):=\{y\in\R^n~|~\exists t \in \R:~ y=\Phi(t,y_0)\}
+\]
+we denote the image of the mapping $t\to \Phi(t,y_0)$. The set $\mathcal{O}(y_0)$ is called \textbf{trajectory} or \textbf{orbit}.
+
+\begin{example}[Predator-Prey-Model, Räuber-Beute-Modell]
+Let $x$ represent the number of prey (maybe a goat) and $y$ the number of the predators (maybe a wolf). We can model
+\begin{align*}
+ x'&=x(a-by) \tag{I.6} \\
+ y'&=y(-c+dx)
+\end{align*}
+where $a,b,c,d\in\R_{>0}$. In the absence of preadotrsthe number of prey is growing exponentially. An increase in the number of predators means a decrease in the number of preys. Note that the decrease of the preys is propotional to $x\cdot y$. In the absence of preys, the predators die. An increase in the number of preys means an increase in the number of predators.
+
+Also note that we assume that the wolf only eats goats and that no further enemies of the goat exist.
+
+These equations belong to the Lotha-Volterra equations.
+
+The origin $(0,0)$ is the only equilibrium point on the boundary of the state space $\R^{2}_{\geq 0}$. In the interior of $\R^2_{\geq 0}$ there exists also only one equilibrium point which is given by $(\bar x, \bar y)=(\tfrac{c}{d},\tfrac{a}{b})$.
+
+The curves of the solutions are closed. To see this, reconsider (I.6). Using simple calculations we get
+\[
+x'\Big(\frac{c }{x}-d\Big)=(a-by)(c-dx)
+\]
+and
+\[
+y'\Big(\frac{a }{y}-b\Big)=(-c+dx)(a-by).
+\]
+By adding up, we obtain
+\[
+\Big(\frac{c }{x}-d\Big)x' + \Big(\frac{a }{y} - b\Big)y' = 0
+\]
+or (using the method of \textit{scharf hinsehen})
+\[
+\partiell{}{t}\Big(c\ln(x)-dx+a\ln(y)-by\Big)=0.
+\]
+Setting
+\[
+B(x):=\bar x \cdot \ln(x) - x ~~\und~~ R(y):=\bar y \cdot \ln(y) - y
+\]
+it holds for $V(x,y):=dB(x)+bR(y)$ that
+\[
+\partiell{}{t} V\big(x(t),y(t)\big)=0
+\]
+or $V(x,y)$ is constant along the trajectories of the solutions. We see that $V(x,y)$ is a conserved quantity (\textit{Erhaltungsgröße}) taking its maximum in the equilibrium point $(\bar x, \bar y)$. This point is stable, too (Homework).
+\end{example}
+
+Let us now consider $V:D\to \R, ~D\subseteq \R^n$ such that in $D$ there exists a equilibrium point $\bar y$ of the system $y'=f(y)$. Taking the derivative of $V$ along the solution $y(t)$ we obtain
+\[
+V'(y(t))=\partiell{}{t}V(y(t))=\nabla \Big(V\cdot y'(t)\Big) = \nabla V\big(f(y(t)\big).
+\]
+If $V'\leq 0$, then $V$ is a monotone falling function along all solutions $y(t)\in D$.
+
+\setcounter{theorem}{23}
+\begin{theorem}[Ljapunov-Stability]
+Let $\bar y\in D\subseteq \R^n$ be an equilibrium point of $y'=f(y)$. Let further $V:D\to\R$ be a differentiable function on an open set $D$ and let $V(\bar y)=0$ and $V(y)>0$ for $y\neq \bar y$ and
+\[
+V'=\partiell{}{t}V \leq 0 ~~\text{on}~~ D\setminus \{\bar y\}.
+\]
+Then the equilibrium point $\bar y$ is stable. If we have $V'<0$ then $\bar y$ is asymptotic stable.
+\end{theorem}
+\begin{proof}
+No proof.
+\end{proof}
+\begin{remark}
+The function $V$ from theorem I.24 is called Ljapunov-function.
+\end{remark}
+
+\section{Numerics of ODEs}
+\begin{motivation}
+     In the following we only consider first order ODEs for a bounded interval $[a,b]\subseteq R$ and a given function $f:[a,b]\times \R \to \R$. We seek for a function $y: [a,b]\to \R$ such that
+     \footnote {We assume in (II.1) that $f$ is sufficiently small, such that all necessery (Taylor-)expansions can be built and we also have uniqueness and existence of a solution for the IVP.}
+     \begin{align*}
+     y'(t)&= f(t,y(t)) ~~ \forall t\in[a,b] \tag{II.1}
+     \end{align*}
+     with initial condition
+     \begin{align*}
+     y'(a) = \hat y. \tag{II.2}
+     \end{align*}
+     We devide the interval $[a,b]$ by
+     \[
+     a=t_0 < t_1 < \dots < t_n=b, ~~ \Delta t_i= t_{i+1}-t_i.
+     \]
+     At the beginning we only consider an equidistant mesh, i.e. $\Delta t_i$ is constant. Later we also consider variable meshsizes, since there might exist solutions where variable meshsizes can be helpful.
+     We write
+     \[
+     \Delta t = \frac{b-a}{n} \und t_i = t_0+i\cdot\Delta t.
+     \]
+     Given a starting value $y_0$ we compute our approximations $y_i$ of the exact solution $y(t_i)$ evaluated at $t_i$.
+\end{motivation}
+\subsection{Two different schemes}
+\subsubsection*{Difference method}
+Replace the tangent of $y$ at $t_i$ by a secant with respect to $t_i$ and $t_{i+1}$, i.e.
+\[
+y'(t_i)=\frac{y(t_{i+1})-y(t_i)}{\Delta t}.
+\]
+Inserting this into the ODE gives
+\[
+\frac{y(t_{i+1})-y(t_i)}{\Delta t}\approx f(t,y(t)).
+\]
+This leads to the \emph{explicit Euler-Method}
+\[
+y_{i+1}= y_i + \Delta t\cdot f(t_i,y_i), ~~ i=0,\dots,n-1.
+\]
+\subsubsection*{Integration method}
+We are using the equation
+\[
+y(t_{i+1})-y(t_i)=\int_{t_i }^{t_{i+1}}y'(\tau)~d\tau=\int_{t_{i}}^{t_{i+1}}f(\tau,y(\tau))~d\tau.
+\]
+Applying the quadrature rule leads to
+\[
+\int_{t_i}^{t_{i+1}}f(\tau,y(\tau))~d\tau \approx (t_{i+1}-t_i)\cdot f(t_{i+1},y(t_{i+1})).
+\]
+The \emph{implicit Euler-Method} follows by that as
+\[
+y_{i+1}=y_i+\Delta t \cdot f(t_\ipo,y(t_{i+1})), ~~i=0,\dots,n-1.
+\]
+\subsection{One-Step Methods}
+"For computing $y_{i+1}$ of $y$ we only use the information at $t_i$."
+\begin{definition}[One-Step Method]
+A method for approximating the IVP (II.1) and (II.2) of the form
+\[
+y_{i+1}=y_i + \Delta t ~\Phi(t_1,y_i,y_\ipo,\Delta t)
+\]
+with some given starting value $y_0$ at $t_0$ and an incremental function (\textit{Verfahrensfunktion})
+\[
+\Phi:[a,b]\times \R\times\R\times \R_+ \to \R
+\]
+is called a \textbf{one-step method}. We call it \textbf{explicit} if $\Phi$ depends not on $y_\ipo$ and \textbf{implicit} otherwise.
+\end{definition}
+\begin{example}
+For the explicit Euler-Method the incremental function $\Phi$ is
+\[
+\Phi(t_i,y_i,y_\ipo,\Delta t)= f(t_1,y_i).
+\]
+For the implicit Euler-Method the incremental function $\Phi$ is
+\[
+\Phi(t_i,y_i,y_\ipo,\Delta t)= f(t_{i+1},y_{i+1}).
+\]
+\end{example}
+Note that in the following we use an abuse of notation: In the explicit case we write $\Phi(t_1,y_1,\Delta t)$. \newline\hfill
+
+\noindent But how do we measure the quality of our approximation?
+
+\begin{definition}[local discretization error (consistency)]
+A one-step method is \textbf{consistent of order $p\in\N$} if for an ODE (II.1) with some solution $y$ and the local discretization error
+\[
+\eta(t,\Delta t)=y(t)+\Delta t \cdot \Phi\Big(t,y(t),y(t+\Delta t),\Delta t\Big) - y(t+\Delta t)
+\]
+for $t\in [a,b]$ and $0\leq \Delta t \leq b-t$ it holds
+\[
+\eta(t,\Delta t)=O(\Delta t^{p+1}) ~\text{ as }~ \Delta t \to 0.
+\]
+In case of $p=1$ we say that the method is \textbf{consistent}.
+\end{definition}
+\begin{revision}
+The Landau-Notation for functions $f$ and $g$ is defined as follows:\newline
+It holds "$f(x)=O(g(x))$ for $x\to a$" if $\Big|\frac{f(x)}{g(x)}\Big|$ is bounded when $x\to a$. Furthermore it holds "$f(x)=o(g(x))$ for $x\to a$" if $\lim_{x\to a} \frac{f(x)}{g(x)}=0$. We make use of an abuse of notation by writing the equality sign, since formally $O(g(x))$ and $o(g(x))$ are sets.
+\end{revision}
+\begin{remark}
+For a consistent method it holds
+\begin{align*}
+\lim_{\Delta t\to 0} \Phi\Big(t,y(t),y(t+\Delta t), \Delta t\Big) &= \underbrace{\lim_{\Delta t \to 0} \frac{\eta(t,\Delta t)}{\Delta t}}_{=0}+\lim_{\Delta t \to 0} \frac{y(t+ \Delta t)- y(t)}{\Delta t}\\&= y'(t)= f(t,y(t)).
+\end{align*}
+\end{remark}
+
+\setcounter{theorem}{2}
+\begin{theorem}[Consistence of the explicit Euler-Method]
+The explicit Euler-Method is consistent of order $p=1$.
+\end{theorem}
+\begin{proof}
+Expansion of $y$ in $t$ gives
+\begin{align*}
+y(t+\Delta t)
+&=y(t)+y(t)\cdot\Delta t + \frac{y''(\varrho)}{2}\Delta t^2,~~\varrho \in [t,t+\Delta t]\\
+&=y(t)+f(t,y(t))\cdot \Delta t + \frac{y''(\varrho)}{2}\Delta t^2.
+\end{align*}
+It thus follows
+\begin{align*}
+\eta(t,\Delta t)
+&=y(t)-\Delta t \cdot f(t,y(t)) - y(t+\Delta t)\\
+&= -\frac{\Delta t^2}{2}y''(\varrho) = O(\Delta t^2)
+\end{align*}
+for $\Delta t \to 0$, since $y''$ is bounded in $[t,t+\Delta t]$.
+\end{proof}
+
+\begin{definition}[Convergence of one-step methods]
+A one-step method with starting value $y_0=y(0)+O(\Delta t^p),~\Delta t \to 0$ is convergent of order $p\in\N$ with respect to the IVP (II.1) and (II.2) if for the approximation $y_i$ of the solution $y(t_i)$ the \textbf{global approximation error}
+\[
+e(t_i,\Delta t)=y(t_i)-y_i
+\]
+for all $t_i,~i=1,\dots, n$ meets
+\[
+e(t_i,\Delta t)=O(\Delta t^p), ~~ \Delta t \to 0
+\]
+In case of $e(t,\Delta t)=O(1)$ we call the method \textbf{consistent}.
+\end{definition}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\end{document}
